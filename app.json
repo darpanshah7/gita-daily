@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "Pocket Gita",
+    "slug": "pocket-gita",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "gitadaily",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2C1810"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.darpan.pocketgita"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#2C1810"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.darpanshah.pocketgita"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#B5451B"
+        }
+      ],
+      "expo-sqlite",
+      "@react-native-community/datetimepicker"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "053d111c-ec34-4fc8-ab07-3f5cb1a29c15"
+      }
+    }
+  }
+}

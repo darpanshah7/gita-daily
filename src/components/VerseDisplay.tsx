@@ -59,7 +59,7 @@ export function VerseDisplay({
           Chapter {verse.chapter} · Verse {verse.verse}
         </Text>
         {verse.speaker ? (
-          <Text style={[styles.speaker, { color: c.textMuted }]}>— {resolveSpeaker(verse.speaker, language)}</Text>
+          <Text style={[styles.speaker, { color: c.textMuted }]}>{resolveSpeaker(verse.speaker, language)}</Text>
         ) : null}
       </View>
 

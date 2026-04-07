@@ -26,7 +26,8 @@
         "backgroundColor": "#2C1810"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.darpanshah.pocketgita"
+      "package": "com.darpanshah.pocketgita",
+      "versionCode": 2
     },
     "web": {
       "bundler": "metro",

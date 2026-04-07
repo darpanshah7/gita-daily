@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../theme';
 import type { Verse, TranslationKey, PreferredLanguage } from '../types';
-import { TRANSLATION_LABELS, TRANSLATION_KEYS } from '../types';
+import { TRANSLATION_LABELS, TRANSLATION_KEYS, resolveSpeaker } from '../types';
 import { DropdownPicker } from './DropdownPicker';
 
 interface Props {
@@ -12,6 +12,7 @@ interface Props {
   isFavorite: boolean;
   onToggleFavorite: () => void;
   onNotePress: () => void;
+  hasNote?: boolean;
   showCommentary?: boolean;
   language?: PreferredLanguage;
   textSize?: number;   // multiplier applied to all body fonts, default 1.0
@@ -23,6 +24,7 @@ export function VerseDisplay({
   isFavorite,
   onToggleFavorite,
   onNotePress,
+  hasNote = false,
   showCommentary = false,
   language = 'english',
   textSize = 1.0,
@@ -42,8 +44,14 @@ export function VerseDisplay({
     setShowSanskrit(language === 'sanskrit');
   }, [language]);
 
-  const availableKeys = TRANSLATION_KEYS.filter(k => verse.translations[k]);
+  // chinmay has no text — treat commentary as its translation body
+  const availableKeys = TRANSLATION_KEYS.filter(k => {
+    const t = verse.translations[k];
+    return t && (t.text || t.commentary);
+  });
   const currentTranslation = verse.translations[selectedTranslation] ?? verse.translations[availableKeys[0]];
+  // chinmay has no translation text — show commentary as body instead
+  const isChinmayOnly = selectedTranslation === 'chinmay' && !currentTranslation?.text;
   const transliterationLines = verse.transliteration.split('\n').filter(l => l.trim());
 
   return (
@@ -57,7 +65,7 @@ export function VerseDisplay({
           Chapter {verse.chapter} · Verse {verse.verse}
         </Text>
         {verse.speaker ? (
-          <Text style={[styles.speaker, { color: c.textMuted }]}>— {verse.speaker}</Text>
+          <Text style={[styles.speaker, { color: c.textMuted }]}>{resolveSpeaker(verse.speaker, language)}</Text>
         ) : null}
       </View>
 
@@ -114,9 +122,19 @@ export function VerseDisplay({
           <Text style={[styles.sectionLabel, { color: c.accent }]}>
             {TRANSLATION_LABELS[selectedTranslation] ?? ''}
           </Text>
-          <Text style={[styles.translationText, { color: c.text, fontSize: fs(16), lineHeight: fs(26) }]}>{currentTranslation.text}</Text>
 
-          {showCommentary && currentTranslation.commentary ? (
+          {/* chinmay has no text — show commentary as main body */}
+          {isChinmayOnly ? (
+            currentTranslation.commentary
+              ? <Text style={[styles.translationText, { color: c.text, fontSize: fs(16), lineHeight: fs(26) }]}>{currentTranslation.commentary}</Text>
+              : <Text style={[styles.unavailable, { color: c.textMuted }]}>No commentary available</Text>
+          ) : (
+            currentTranslation.text
+              ? <Text style={[styles.translationText, { color: c.text, fontSize: fs(16), lineHeight: fs(26) }]}>{currentTranslation.text}</Text>
+              : <Text style={[styles.unavailable, { color: c.textMuted }]}>No translation available</Text>
+          )}
+
+          {showCommentary && !isChinmayOnly && currentTranslation.commentary ? (
             <>
               <TouchableOpacity
                 onPress={() => setCommExpanded(e => !e)}
@@ -172,7 +190,7 @@ export function VerseDisplay({
           style={[styles.actionBtn, { backgroundColor: c.surface, borderColor: c.border }]}
         >
           <Ionicons name="create-outline" size={22} color={c.accent} />
-          <Text style={[styles.actionLabel, { color: c.textMuted }]}>Add Note</Text>
+          <Text style={[styles.actionLabel, { color: c.textMuted }]}>{hasNote ? 'Edit Note' : 'Add Note'}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -240,6 +258,7 @@ const styles = StyleSheet.create({
   },
   commToggleText: { fontSize: 13, fontWeight: '600' },
   commentary: { fontSize: 13, lineHeight: 21, marginTop: 8, fontStyle: 'italic' },
+  unavailable: { fontSize: 14, fontStyle: 'italic', marginTop: 4 },
   actions: {
     flexDirection: 'row',
     gap: 12,

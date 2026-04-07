@@ -1,17 +1,21 @@
-export type TranslationKey = 'siva' | 'gambir' | 'chinmay' | 'tej' | 'prabhu' | 'san' | 'vallabh';
+export type TranslationKey = 'siva' | 'gambir' | 'chinmay' | 'tej' | 'prabhu' | 'san' | 'vallabh' | 'ramanHt' | 'sankarEt' | 'sankarHt';
+
 
 export const TRANSLATION_LABELS: Record<TranslationKey, string> = {
-  siva:    'Swami Sivananda (English)',
-  gambir:  'Swami Gambhirananda (English)',
-  chinmay: 'Swami Chinmayananda (English)',
-  tej:     'Swami Tejomayananda (English)',
-  prabhu:  'Swami Prabhupada (English)',
-  san:     'Adi Shankaracharya (Hindi)',
-  vallabh: 'Shri Vallabhacharya (Hindi)',
+  siva:     'Swami Sivananda (English)',
+  gambir:   'Swami Gambhirananda (English)',
+  chinmay:  'Swami Chinmayananda (Hindi)',
+  tej:      'Swami Tejomayananda (Hindi)',
+  prabhu:   'Swami Prabhupada (English)',
+  san:      'Dr. S. Sankaranarayan (English)',
+  vallabh:  'Shri Vallabhacharya (Hindi)',
+  ramanHt:  'Sri Ramanuja (Hindi)',
+  sankarEt: 'Adi Shankaracharya (English)',
+  sankarHt: 'Adi Shankaracharya (Hindi)',
 };
 
-// English translations first, Hindi last
-export const TRANSLATION_KEYS: TranslationKey[] = ['siva', 'gambir', 'chinmay', 'tej', 'prabhu', 'san', 'vallabh'];
+// English first, Hindi last
+export const TRANSLATION_KEYS: TranslationKey[] = ['siva', 'gambir', 'prabhu', 'sankarEt', 'tej', 'ramanHt', 'sankarHt', 'chinmay'];
 
 export interface Translation {
   text: string;
@@ -70,6 +74,18 @@ export interface Note {
 
 export type VerseOrder = 'sequential' | 'random';
 export type PreferredLanguage = 'english' | 'sanskrit';
+
+const SPEAKER_EN: Record<string, string> = {
+  'धृतराष्ट्र': 'Dhritarashtra',
+  'सञ्जय':      'Sanjay',
+  'अर्जुन':     'Arjun',
+  'श्रीभगवान्': 'Shri Bhagavan',
+};
+
+export function resolveSpeaker(speaker: string, language: PreferredLanguage): string {
+  if (language === 'english') return SPEAKER_EN[speaker] ?? speaker;
+  return speaker;
+}
 export type BrowseScrollMode = 'list' | 'pager';
 export type AppTheme = 'light' | 'dark' | 'system';
 
@@ -93,7 +109,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   preferred_language: 'english',
   browse_scroll_mode: 'list',
   text_size: 1.0,
-  last_verse_index: 0,
+  last_verse_index: -1,
   last_verse_date: '',
   notifications_enabled: false,
   theme: 'system',

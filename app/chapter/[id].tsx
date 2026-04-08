@@ -242,11 +242,11 @@ function ChapterIntroCard({
         showsVerticalScrollIndicator={false}
       >
         <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.cardBorder, minHeight: height - 48 }]}>
-          {/* Inline chapter badge */}
-          <View style={[styles.introBadge, { backgroundColor: c.surfaceAlt }]}>
+          {/* Inline chapter badge — tap to jump to a verse */}
+          <TouchableOpacity style={[styles.introBadge, { backgroundColor: c.surfaceAlt }]} onPress={onVersePickerPress} hitSlop={8}>
             <Text style={[styles.introBadgeLabel, { color: c.textMuted, fontSize: fs(9) }]}>Chapter</Text>
             <Text style={[styles.introBadgeNum, { color: c.primary, fontSize: fs(15) }]}>{chapter.chapter}</Text>
-          </View>
+          </TouchableOpacity>
 
           {/* Sanskrit name */}
           {chapter.name ? (
@@ -278,11 +278,9 @@ function ChapterIntroCard({
             </Text>
           ) : null}
 
-          <TouchableOpacity onPress={onVersePickerPress} hitSlop={8} style={{ alignSelf: 'center' }}>
-            <Text style={[styles.introVerseCount, { color: c.primary, fontSize: fs(10) }]}>
-              {chapter.verse_count} verses · tap to jump to a verse
-            </Text>
-          </TouchableOpacity>
+          <Text style={[styles.introVerseCount, { color: c.textMuted, fontSize: fs(10) }]}>
+            {chapter.verse_count} verses · swipe to begin reading
+          </Text>
         </View>
       </ScrollView>
     </View>

@@ -52,13 +52,28 @@ export function VerseDisplay({
   const currentTranslation = verse.translations[selectedTranslation] ?? verse.translations[availableKeys[0]];
   // chinmay has no translation text — show commentary as body instead
   const isChinmayOnly = selectedTranslation === 'chinmay' && !currentTranslation?.text;
-  // Split transliteration into individual padas (metrical units) for recitation-style display.
-  // Each \n-separated chunk may contain multiple padas separated by " ." (space-period).
-  // Note: "." within a word (e.g. "saṅgo.astvakarmaṇi") is sandhi — not a separator.
+  // Split each hemistich (half-verse) into 2 padas at the midpoint word boundary.
+  // The data stores each hemistich as a \n-separated line ending with " .".
+  // Lines with ≤2 words (e.g. speaker declarations like "dhṛtarāṣṭra uvāca") are kept whole.
+  function splitHemistich(hemistich: string): string[] {
+    const words = hemistich.trim().split(/\s+/);
+    if (words.length <= 2) return [hemistich.trim()];
+    const totalLen = hemistich.trim().length;
+    const mid = totalLen / 2;
+    let cumLen = 0;
+    let bestSplit = Math.floor(words.length / 2);
+    let bestDist = Infinity;
+    for (let i = 0; i < words.length - 1; i++) {
+      cumLen += words[i].length + 1;
+      const dist = Math.abs(cumLen - mid);
+      if (dist < bestDist) { bestDist = dist; bestSplit = i + 1; }
+    }
+    return [words.slice(0, bestSplit).join(' '), words.slice(bestSplit).join(' ')];
+  }
+
   const transliterationPadas = verse.transliteration
     .split('\n')
-    .flatMap(line => line.split(' .'))
-    .map(p => p.trim())
+    .flatMap(line => splitHemistich(line.replace(/ \.$/, '').trim()))
     .filter(p => p.length > 0);
 
   return (

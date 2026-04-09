@@ -137,7 +137,8 @@ export default function ChapterScreen() {
               onLayout={handlePagerLayout}
               renderItem={({ item }) =>
                 item.type === 'intro' ? (
-                  <ChapterIntroCard chapter={chapter} c={c} width={width} height={cardHeight} textScale={settings.text_size * browseTextMult} onVersePickerPress={() => setShowVersePicker(true)} />
+                  <ChapterIntroCard chapter={chapter} c={c} width={width} height={cardHeight} textScale={settings.text_size * browseTextMult} onVersePickerPress={() => setShowVersePicker(true)} mode="pager"
+                    onSwipeToNext={() => pagerRef.current?.scrollToIndex({ index: 1, animated: true })} />
                 ) : (
                   <VerseContent
                     verse={item.verse}
@@ -169,7 +170,8 @@ export default function ChapterScreen() {
               onLayout={handleListLayout}
               renderItem={({ item }) =>
                 item.type === 'intro' ? (
-                  <ChapterIntroCard chapter={chapter} c={c} width={width} height={cardHeight} textScale={settings.text_size * browseTextMult} onVersePickerPress={() => setShowVersePicker(true)} />
+                  <ChapterIntroCard chapter={chapter} c={c} width={width} height={cardHeight} textScale={settings.text_size * browseTextMult} onVersePickerPress={() => setShowVersePicker(true)} mode="list"
+                    onSwipeToNext={() => listRef.current?.scrollToIndex({ index: 1, animated: true })} />
                 ) : (
                   <VerseContent
                     verse={item.verse}
@@ -223,24 +225,55 @@ export default function ChapterScreen() {
 }
 
 function ChapterIntroCard({
-  chapter, c, width, height, textScale, onVersePickerPress,
+  chapter, c, width, height, textScale, onVersePickerPress, onSwipeToNext, mode,
 }: {
   chapter: Chapter;
   c: ReturnType<typeof useTheme>;
   width: number;
   height: number;
   textScale: number;
+  mode?: 'list' | 'pager';
   onVersePickerPress?: () => void;
+  onSwipeToNext?: () => void;
 }) {
   const BASE_HEIGHT = 500;
   const scale = Math.min(Math.max(height / BASE_HEIGHT, 1.0), 1.9) * textScale;
   const fs = (n: number) => Math.round(n * scale);
+
+  const containerHeightRef = useRef(0);
+  const contentHeightRef = useRef(0);
+  const [innerScrollEnabled, setInnerScrollEnabled] = useState(false);
+  const atBottomRef = useRef(false);
+
+  function updateScrollEnabled() {
+    setInnerScrollEnabled(contentHeightRef.current > containerHeightRef.current + 2);
+  }
 
   return (
     <View style={{ width, height }}>
       <ScrollView
         contentContainerStyle={[styles.cardContent, { backgroundColor: c.background }]}
         showsVerticalScrollIndicator={false}
+        scrollEnabled={innerScrollEnabled}
+        onLayout={e => {
+          containerHeightRef.current = e.nativeEvent.layout.height;
+          updateScrollEnabled();
+        }}
+        onContentSizeChange={(_w, h) => {
+          contentHeightRef.current = h;
+          updateScrollEnabled();
+        }}
+        onScroll={e => {
+          const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+          atBottomRef.current = contentOffset.y + layoutMeasurement.height >= contentSize.height - 4;
+        }}
+        scrollEventThrottle={16}
+        onScrollEndDrag={e => {
+          // Swipe up (negative y velocity) at the bottom → go to next card
+          if (atBottomRef.current && (e.nativeEvent.velocity?.y ?? 0) < -0.3) {
+            onSwipeToNext?.();
+          }
+        }}
       >
         <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.cardBorder, minHeight: height - 48 }]}>
           {/* Inline chapter badge — tap to jump to a verse */}
@@ -249,21 +282,18 @@ function ChapterIntroCard({
             <Text style={[styles.introBadgeNum, { color: c.primary, fontSize: fs(15) }]}>{chapter.chapter}</Text>
           </TouchableOpacity>
 
-          {/* Sanskrit name */}
           {chapter.name ? (
             <Text style={[styles.introSanskrit, { color: c.sanskrit, fontSize: fs(20), lineHeight: fs(30) }]}>
               {chapter.name}
             </Text>
           ) : null}
 
-          {/* Transliterated name */}
           {chapter.name_transliterated ? (
             <Text style={[styles.introTranslit, { color: c.text, fontSize: fs(17), lineHeight: fs(24) }]}>
               {chapter.name_transliterated}
             </Text>
           ) : null}
 
-          {/* Meaning */}
           {chapter.name_meaning ? (
             <Text style={[styles.introMeaning, { color: c.accent, fontSize: fs(13), lineHeight: fs(20) }]}>
               {chapter.name_meaning}
@@ -272,7 +302,6 @@ function ChapterIntroCard({
 
           <View style={[styles.introDivider, { backgroundColor: c.border }]} />
 
-          {/* Full summary */}
           {chapter.summary ? (
             <Text style={[styles.introSummary, { color: c.textSecondary, fontSize: fs(13), lineHeight: fs(21) }]}>
               {chapter.summary}
@@ -280,7 +309,7 @@ function ChapterIntroCard({
           ) : null}
 
           <Text style={[styles.introVerseCount, { color: c.textMuted, fontSize: fs(10) }]}>
-            {chapter.verse_count} verses · swipe to begin reading
+            {chapter.verse_count} verses · {mode === 'pager' ? 'swipe left' : 'swipe up'} to begin reading
           </Text>
         </View>
       </ScrollView>

@@ -293,18 +293,18 @@ function ChapterIntroCard({
         {chapter.summary ? (
           <View style={expanded ? {} : { flex: 1 }}>
             {/* Hidden unconstrained text — measures true natural height (always rendered) */}
-            <Text
-              style={[styles.introSummary, {
-                fontSize: fs(13), lineHeight: fs(21),
-                position: 'absolute', left: 0, right: 0, opacity: 0,
-              }]}
-              onLayout={e => {
-                textNaturalHeightRef.current = e.nativeEvent.layout.height;
-                recheckOverflow();
-              }}
-            >
-              {chapter.summary}
-            </Text>
+            <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, opacity: 0 }}>
+              <Text
+                style={[styles.introSummary, { fontSize: fs(13), lineHeight: fs(21) }]}
+                selectable={false}
+                onLayout={e => {
+                  textNaturalHeightRef.current = e.nativeEvent.layout.height;
+                  recheckOverflow();
+                }}
+              >
+                {chapter.summary}
+              </Text>
+            </View>
 
             {/* Visible text — clips when collapsed */}
             <View
@@ -516,7 +516,8 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 12,
+    paddingLeft: 0,
+    paddingRight: 12,
     paddingVertical: 6,
     borderRadius: 10,
   },

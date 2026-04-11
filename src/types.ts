@@ -77,9 +77,9 @@ export type PreferredLanguage = 'english' | 'sanskrit';
 
 const SPEAKER_EN: Record<string, string> = {
   'धृतराष्ट्र': 'Dhritarashtra',
-  'सञ्जय':      'Sanjay',
-  'अर्जुन':     'Arjun',
-  'श्रीभगवान्': 'Shri Bhagavan',
+  'सञ्जय':      'Sanjaya',
+  'अर्जुन':     'Arjuna',
+  'श्रीभगवान्': 'Shri Krishna',
 };
 
 export function resolveSpeaker(speaker: string, language: PreferredLanguage): string {

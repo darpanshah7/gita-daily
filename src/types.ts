@@ -84,7 +84,7 @@ const SPEAKER_EN: Record<string, string> = {
 
 export function resolveSpeaker(speaker: string, language: PreferredLanguage): string {
   if (language === 'english') return SPEAKER_EN[speaker] ?? speaker;
-  return speaker; // sanskrit uses Devanagari
+  return speaker;
 }
 export type BrowseScrollMode = 'list' | 'pager';
 export type AppTheme = 'light' | 'dark' | 'system';
